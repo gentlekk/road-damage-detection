@@ -1,0 +1,97 @@
+# ============================================================
+# uv 项目配置
+# ============================================================
+# 常用命令：
+#   uv python install 3.10     # 装 Python（uv 自己管，不用 conda）
+#   uv sync                    # 按本文件装依赖 + 生成 uv.lock
+#   uv run python scripts/train.py    # 在项目环境里跑脚本
+#   uv add <包名>              # 加依赖并自动更新 lock
+#   uv lock --upgrade          # 升级依赖
+#
+# ⚠️ 换 CUDA 版本只需改下面 [[tool.uv.index]] 的 url 和名称
+# ============================================================
+
+[project]
+name = "rdd-yolo-vlm"
+version = "0.1.0"
+description = "基于 YOLO 与多模态大模型协同的道路病害智能检测与养护决策系统"
+readme = "README.md"
+
+# Python 版本「约束」= 兼容性声明，面向【所有安装这个包的人】
+#
+# 它回答的是「这个项目能在哪些 Python 上跑」，不是「我开发时用哪个」。
+# 技术上可以写死（如 "==3.10.*"），但不该这么做：
+#   一旦写死，别人用 3.11 安装会被直接拒绝，即使代码明明能跑。
+#
+# 开发环境用哪个版本 → 由 .python-version 文件指定（当前 3.10）
+# 用命令设置：uv python pin 3.10
+requires-python = ">=3.10,<3.13"
+
+dependencies = [
+    # ---- 核心：检测 ----
+    "ultralytics>=8.3.0",
+
+    # ---- PyTorch（由下方 tool.uv.sources 指定 CUDA 索引，勿删）----
+    "torch>=2.1.0",
+    "torchvision>=0.16.0",
+
+    # ---- 基础 ----
+    "numpy>=1.24.0",
+    "opencv-python>=4.8.0",
+    "pillow>=10.0.0",
+    "pyyaml>=6.0",
+
+    # ---- 数据集下载 ----
+    "kagglehub>=0.3.0",         # 下载 RDD2022（比命令行版 kaggle 简单，不用配 token）
+
+    # ---- VLM：云端 API（本项目采用，不本地部署）----
+    "openai>=1.30.0",
+    "python-dotenv>=1.0.0",     # 从 .env 读 API key，免去每次重设环境变量
+
+    # ---- 界面 ----
+    "gradio>=4.44.0",
+
+    # ---- 数据与可视化 ----
+    "pandas>=2.0.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.13.0",
+    "tqdm>=4.66.0",
+]
+
+# ============================================================
+# PyTorch CUDA 索引配置
+# ============================================================
+# 默认走官方 cu121。若你的显卡驱动对应别的版本，
+# 把下面 url 的 cu121 改成 cu118 / cu124 / cu126 等即可。
+#
+# 国内网络慢的话，可换成上海交大镜像（注意保持名称一致）：
+#   url = "https://mirror.sjtu.edu.cn/pytorch-wheels/cu121/"
+# ============================================================
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu121" }
+torchvision = { index = "pytorch-cu121" }
+
+# ============================================================
+# 可选依赖组
+# ============================================================
+# 仅在服务器上本地部署 VLM 时才需要（本项目默认不用）：
+#   uv sync --extra localvlm
+# ============================================================
+
+[project.optional-dependencies]
+localvlm = [
+    "transformers>=4.49.0",
+    "accelerate>=0.26.0",
+    "qwen-vl-utils>=0.0.8",
+]
+
+[dependency-groups]
+dev = [
+    "ipython>=8.0.0",
+]
