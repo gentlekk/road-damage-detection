@@ -39,7 +39,12 @@ except ImportError:
 # ------------------------------------------------------------------
 # 配置区（改这里就行）
 # ------------------------------------------------------------------
-YOLO_WEIGHTS = "runs/road_damage/yolo11n/weights/best.pt"
+# 项目根目录（本文件在 scripts/ 下）
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# 权重用绝对路径，这样在哪个目录启动都能找到
+YOLO_WEIGHTS = str(PROJECT_ROOT / "runs" / "road_damage" / "yolo11n" / "weights" / "best.pt")
+
 USE_VLM = os.getenv("USE_VLM", "0") == "1"   # 设为 1 启用 VLM 复核
 CONF_THRESHOLD = 0.4
 

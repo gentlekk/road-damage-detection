@@ -24,6 +24,14 @@ from pathlib import Path
 import yaml
 from ultralytics import YOLO
 
+# 项目根目录（scripts/ 的上一级）
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# ⚠️ 输出目录必须用【绝对路径】
+#    ultralytics 规则：project 是相对路径时会被拼到全局设置 runs_dir 后面，
+#    而全局 runs_dir 可能被别的软件（如 SD WebUI）改过。
+DEFAULT_RUNS = str(PROJECT_ROOT / "runs" / "road_damage")
+
 
 # ------------------------------------------------------------------
 # 词表：把 RDD2022 的类别名映射成开放词汇提示词
@@ -176,8 +184,10 @@ def main():
     p.add_argument("--epochs", type=int, default=50)
     p.add_argument("--batch", type=int, default=8)
     p.add_argument("--imgsz", type=int, default=640)
-    p.add_argument("--out", default="runs/road_damage")
-    p.add_argument("--project", default="runs/road_damage")
+    p.add_argument("--out", default=DEFAULT_RUNS,
+                   help="零样本推理结果目录（绝对路径）")
+    p.add_argument("--project", default=DEFAULT_RUNS,
+                   help="微调训练输出目录（绝对路径）")
     args = p.parse_args()
 
     # 方案 A：零样本

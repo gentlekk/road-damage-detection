@@ -15,11 +15,11 @@
 
 # 数据集根目录
 # ↓ 下面这行是【占位符】，跑 download_data.py 后会被自动替换
-path: D:/datasets/rdd2022          # ← 占位符，别手动改，跑脚本自动填
+path: D:/File_kk/WorkSpace/graduation-project/datasets/sreekaraditya/rdd2022-yolo-crackscan-v2/versions/2
 
 # 划分文件（相对 path 的路径，通常不用动）
 train: train/images
-val: valid/images
+val: val/images
 test: test/images
 
 # ---- 类别定义 ----

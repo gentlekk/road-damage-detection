@@ -22,6 +22,15 @@ from pathlib import Path
 import torch
 from ultralytics import YOLO
 
+# 项目根目录（scripts/ 的上一级）
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# ⚠️ 输出目录必须用【绝对路径】
+#    ultralytics 规则：project 是相对路径时会被拼到全局设置 runs_dir 后面，
+#    而全局 runs_dir 可能被别的软件（如 SD WebUI）改过，
+#    导致训练结果存到项目外面去。
+DEFAULT_RUNS = str(PROJECT_ROOT / "runs" / "road_damage")
+
 
 # ------------------------------------------------------------------
 # 显存自适应
@@ -136,7 +145,8 @@ def main():
     parser.add_argument("--batch", type=int, default=None,
                         help="留空则按显存自动选择")
     parser.add_argument("--imgsz", type=int, default=None)
-    parser.add_argument("--project", default="runs/road_damage")
+    parser.add_argument("--project", default=DEFAULT_RUNS,
+                        help="输出目录（默认项目内的 runs/road_damage，绝对路径）")
     parser.add_argument("--all", action="store_true",
                         help="依次训练 yolo11n / yolo11s / yolov8n 三个模型")
     parser.add_argument("--cross-domain", action="store_true",

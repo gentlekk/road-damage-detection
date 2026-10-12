@@ -27,6 +27,13 @@ from pathlib import Path
 import cv2
 from ultralytics import YOLO
 
+# 项目根目录（scripts/ 的上一级）
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# 默认权重：实验一训出来的 YOLO11n（绝对路径，不受运行目录影响）
+DEFAULT_WEIGHTS = str(PROJECT_ROOT / "runs" / "road_damage" / "yolo11n" / "weights" / "best.pt")
+DEFAULT_OUT = str(PROJECT_ROOT / "runs" / "vlm_review")
+
 # 自动从 .env 读取 API key（找不到 .env 也不会报错）
 try:
     from dotenv import load_dotenv
@@ -354,7 +361,8 @@ def main():
     p = argparse.ArgumentParser(description="YOLO + VLM 级联复核")
     p.add_argument("--image", help="单张图片路径")
     p.add_argument("--dir", help="图片目录，批量处理")
-    p.add_argument("--yolo", default="runs/road_damage/yolo11n/weights/best.pt")
+    p.add_argument("--yolo", default=DEFAULT_WEIGHTS,
+                   help="检测器权重（默认实验一的 YOLO11n best.pt）")
     p.add_argument("--backend", default="api", choices=["api", "local"],
                    help="api=云端（默认）；local=本地部署（需大显存）")
     p.add_argument("--provider", default=None,
@@ -367,7 +375,8 @@ def main():
     p.add_argument("--conf", type=float, default=0.4, help="YOLO 置信度阈值")
     p.add_argument("--vlm-min-conf", type=float, default=0.5,
                    help="低于此置信度不调 VLM（省调用）")
-    p.add_argument("--out", default="runs/vlm_review")
+    p.add_argument("--out", default=DEFAULT_OUT,
+                   help="结果输出目录（绝对路径）")
     p.add_argument("--json", action="store_true", help="输出 JSON 结果")
     args = p.parse_args()
 

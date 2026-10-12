@@ -38,6 +38,17 @@ import yaml
 
 
 # ------------------------------------------------------------------
+# 项目根目录 / 默认输出目录
+# ------------------------------------------------------------------
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# ⚠️ 输出目录必须用【绝对路径】
+#    ultralytics 规则：project 是相对路径时会被拼到全局设置 runs_dir 后面，
+#    而全局 runs_dir 可能被别的软件（如 SD WebUI）改过。
+DEFAULT_WORK = str(PROJECT_ROOT / "cross_domain")
+
+
+# ------------------------------------------------------------------
 # 国家识别：靠文件名前缀
 # ------------------------------------------------------------------
 COUNTRY_PREFIXES = {
@@ -161,8 +172,8 @@ def main(argv=None):
     p = argparse.ArgumentParser(description="实验三：跨域泛化评估（留一法）")
     p.add_argument("--data", default="scripts/data.yaml",
                    help="原始数据集配置（用于读取 path / nc / names）")
-    p.add_argument("--work", default="cross_domain",
-                   help="子集与权重的输出根目录")
+    p.add_argument("--work", default=DEFAULT_WORK,
+                   help="子集与权重的输出根目录（绝对路径）")
     p.add_argument("--model", default="yolo11n.pt")
     p.add_argument("--epochs", type=int, default=100)
     p.add_argument("--batch", type=int, default=8)
@@ -292,9 +303,19 @@ def _print_analysis(work: Path, summary):
     print("\n" + "=" * 64)
     print("  汇总结果")
     print("=" * 64)
-    print(f"{'编号':<5}{'训练集':<28}{'测试集':<10}{'mAP@0.5':<10}")
+    print(f"{'编号':<5}{'训练集':<40}{'测试集':<10}{'训练样本':<12}{'mAP@0.5':<10}")
     for num, tr, te, n, m50, m in summary:
-        print(f"{num:<5}{tr:<28}{te:<10}{m50:<10}")
+        print(f"{num:<5}{tr:<40}{te:<10}{n:<12,}{m50:<10}")
+
+    # ---- dry-run 模式：mAP 是占位符 "-"，跳过数值分析 ----
+    if any(str(row[4]) == "-" for row in summary):
+        print("\n" + "-" * 64)
+        print("  [dry-run 模式] 未实际训练，跳过数值分析")
+        print("-" * 64)
+        print("  划分配置验证完毕。确认上面的样本数无误后，去掉 --dry-run 正式训练：")
+        print("      uv run python scripts/cross_domain.py --epochs 100")
+        print(f"\n结果已保存至: {work}/summary.csv")
+        return
 
     print("\n" + "-" * 64)
     print("  【对照 A】多源训练的收益    对比 03 与 05")
